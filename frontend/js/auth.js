@@ -3,8 +3,8 @@ function showMessage(msg) {
 }
 
 function registerUser() {
-  const username = document.getElementById('registerUsername').value;
-  const password = document.getElementById('registerPassword').value;
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
 
   fetch('http://127.0.0.1:8000/api/register/', {
     method: 'POST',
@@ -13,16 +13,16 @@ function registerUser() {
   })
   .then(res => {
     if (res.ok) {
-      showMessage('Registration successful! Please login.');
+      showMessage('Registration successful! Go to Login.');
     } else {
-      showMessage('Registration failed. Username may be taken.');
+      showMessage('Registration failed.');
     }
   });
 }
 
 function loginUser() {
-  const username = document.getElementById('loginUsername').value;
-  const password = document.getElementById('loginPassword').value;
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
 
   fetch('http://127.0.0.1:8000/api/token/', {
     method: 'POST',
@@ -34,9 +34,10 @@ function loginUser() {
     if (data.access) {
       localStorage.setItem('access', data.access);
       localStorage.setItem('refresh', data.refresh);
-      showMessage('Login successful! Token saved in localStorage.');
+      showMessage('Login successful!');
+      window.location.href = 'profile.html';
     } else {
-      showMessage('Login failed. Check your username/password.');
+      showMessage('Login failed.');
     }
   });
 }
