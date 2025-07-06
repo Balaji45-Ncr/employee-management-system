@@ -1,58 +1,36 @@
+function loadEmployees() {
+  const search = document.getElementById('search').value;
+  let url = 'http://127.0.0.1:8000/api/employees/';
+  if (search) url += '?search=' + encodeURIComponent(search);
 
-function addField() {
-  const form = document.getElementById('dynamicForm');
-
-  const row = document.createElement('div');
-  row.className = 'field-row';
-
-  const labelInput = document.createElement('input');
-  labelInput.placeholder = 'Field Label';
-
-  const valueInput = document.createElement('input');
-  valueInput.placeholder = 'Field Value';
-
-  row.appendChild(labelInput);
-  row.appendChild(valueInput);
-
-  form.appendChild(row);
-}
-
-function submitEmployee() {
-  const rows = document.getElementsByClassName('field-row');
-  const fields = {};
-
-  for (let row of rows) {
-    const label = row.children[0].value;
-    const value = row.children[1].value;
-    fields[label] = value;
-  }
-
-  console.log('Collected Employee Data:', fields);
-
-  const access = localStorage.getItem('access');
-  if (!access) {
-    showMessage("You are not logged in.");
-    return;
-  }
-
-  fetch('http://127.0.0.1:8000/api/employees/', {
-    method: 'POST',
+  fetch(url, {
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access}`
-    },
-    body: JSON.stringify({ data: fields })
-  })
-  .then(res => {
-    if (res.ok) {
-      showMessage("Employee created!");
-    } else {
-      showMessage("Failed to create employee.");
+      'Authorization': 'Bearer ' + localStorage.getItem('access')
     }
   })
-  .catch(err => showMessage("Error: " + err.message));
+  .then(res => res.json())
+  .then(data => {
+    const container = document.getElementById('employeeList');
+    container.innerHTML = '';
+    data.forEach(emp => {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <pre>${JSON.stringify(emp.data, null, 2)}</pre>
+        <button onclick="deleteEmployee(${emp.id})">Delete</button>
+      `;
+      container.appendChild(div);
+    });
+  });
 }
 
-function showMessage(msg) {
-  document.getElementById('message').innerText = msg;
+function deleteEmployee(id) {
+  fetch(`http://127.0.0.1:8000/api/employees/${id}/`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer ' + localStorage.getItem('access')
+    }
+  })
+  .then(() => {
+    loadEmployees();
+  });
 }
